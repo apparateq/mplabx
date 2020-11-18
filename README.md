@@ -1,2 +1,1 @@
-# mplabx
-Microchip PIC IDE
+# picprojects

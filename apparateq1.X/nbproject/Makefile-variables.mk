@@ -1,0 +1,13 @@
+#
+# Generated - do not edit!
+#
+# NOCDDL
+#
+CND_BASEDIR=`pwd`
+# PIC16F18346 configuration
+CND_ARTIFACT_DIR_PIC16F18346=dist/PIC16F18346/production
+CND_ARTIFACT_NAME_PIC16F18346=apparateq1.X.production.null
+CND_ARTIFACT_PATH_PIC16F18346=dist/PIC16F18346/production/apparateq1.X.production.null
+CND_PACKAGE_DIR_PIC16F18346=${CND_DISTDIR}/PIC16F18346/package
+CND_PACKAGE_NAME_PIC16F18346=apparateq1.x.tar
+CND_PACKAGE_PATH_PIC16F18346=${CND_DISTDIR}/PIC16F18346/package/apparateq1.x.tar

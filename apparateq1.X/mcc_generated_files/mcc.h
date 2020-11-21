@@ -56,6 +56,7 @@
 #include "tmr2.h"
 #include "pwm5.h"
 #include "adc.h"
+#include "tmr0.h"
 #include "eusart.h"
 
 

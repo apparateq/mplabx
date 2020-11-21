@@ -42,7 +42,7 @@ void nextApp(void) {
     app_change = false;
     program++;
 
-    if (program > 3) {
+    if (program > 4) {
         program = 0;
     }
 }
@@ -61,6 +61,12 @@ void setLEDs(uint8_t val) {
   LED_D6_LAT = (val & 2) >> 1;
   LED_D5_LAT = (val & 4) >> 2;
   LED_D4_LAT = (val & 8) >> 3;
+}
+
+void TimerInterruptHandler(void){
+  // add your TMR0 interrupt custom code
+  // or set custom function using TMR0_SetInterruptHandler()
+  LED_D4_Toggle();
 }
 
 // Applications
@@ -83,6 +89,20 @@ void ADC(void) {
   }
 }
 
+
+// Enable and disable timer interrupts - LEDs are toggled in interrupt
+void timer_int(void) {
+  if (app_state == NOT_RUNNING) {
+    PIE0bits.TMR0IE = 1;
+    app_state = RUNNING;
+  }
+
+  if (app_change) {
+    PIE0bits.TMR0IE = 0;
+    app_state = NOT_RUNNING;
+  }
+}
+
 // Show lower four bits of 8 bit counter on the LEDs
 void blink_leds() {
   static uint8_t val = 0;
@@ -93,7 +113,7 @@ void blink_leds() {
 
 // Read char from asynchronous UART, show lower four bits
 void asynch_read() {
-  uint8_t rx = EUSART_Read();
+  uint8_t rx = RC1REG;
   if (rx != 0) {
     setLEDs(rx);
   }
@@ -106,15 +126,18 @@ void demo() {
    checkButtonS1();
    switch (program) {
      case 0:
-       ADC();
+       timer_int();
        break;
      case 1:
-       PWM();
+       ADC();
        break;
      case 2:
-       blink_leds();
+       PWM();
        break;
      case 3:
+       blink_leds();
+       break;
+     case 4:
        asynch_read();
        break;
      default:
@@ -153,20 +176,21 @@ void UARTRxLoop() {
 
 // Main program loop
 void main(void) {
-    // initialize the device
-    SYSTEM_Initialize();
+  // initialize the device
+  SYSTEM_Initialize();
 
-    // Enable the Global Interrupts
-    //INTERRUPT_GlobalInterruptEnable();
+  TMR0_SetInterruptHandler(TimerInterruptHandler);
 
-    // Enable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptEnable();
+  INTERRUPT_GlobalInterruptEnable();
 
-    printf("Welcome!\n");
+  TMR0_StartTimer();
 
-    UARTRxLoop();
-    // not reached
-    demo();
+
+  printf("Welcome!\n");
+
+  //UARTRxLoop();
+  // not reached
+  demo();
 
 
 }

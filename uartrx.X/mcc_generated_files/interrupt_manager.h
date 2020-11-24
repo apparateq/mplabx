@@ -1,11 +1,11 @@
 /**
-  Generated Interrupt Manager Source File
+  Generated Interrupt Manager Header File
 
   @Company:
     Microchip Technology Inc.
 
   @File Name:
-    interrupt_manager.c
+    interrupt_manager.h
 
   @Summary:
     This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
@@ -46,31 +46,59 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
+#ifndef INTERRUPT_MANAGER_H
+#define INTERRUPT_MANAGER_H
 
-void __interrupt() INTERRUPT_InterruptManager (void)
-{
-    if(INTCONbits.PEIE == 1)
-    {
-        if(PIE1bits.TXIE == 1 && PIR1bits.TXIF == 1)
-        {
-            EUSART_TxDefaultInterruptHandler();
-        } 
-        else if(PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)
-        {
-            EUSART_RxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
-}
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    This macro will enable global interrupts.
+ * @Example
+    INTERRUPT_GlobalInterruptEnable();
+ */
+#define INTERRUPT_GlobalInterruptEnable() (INTCONbits.GIE = 1)
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    This macro will disable global interrupts.
+ * @Example
+    INTERRUPT_GlobalInterruptDisable();
+ */
+#define INTERRUPT_GlobalInterruptDisable() (INTCONbits.GIE = 0)
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    This macro will enable peripheral interrupts.
+ * @Example
+    INTERRUPT_PeripheralInterruptEnable();
+ */
+#define INTERRUPT_PeripheralInterruptEnable() (INTCONbits.PEIE = 1)
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    This macro will disable peripheral interrupts.
+ * @Example
+    INTERRUPT_PeripheralInterruptDisable();
+ */
+#define INTERRUPT_PeripheralInterruptDisable() (INTCONbits.PEIE = 0)
+
+
+#endif  // INTERRUPT_MANAGER_H
 /**
  End of File
 */

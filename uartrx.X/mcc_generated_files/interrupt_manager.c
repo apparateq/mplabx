@@ -51,6 +51,7 @@
 
 void __interrupt() INTERRUPT_InterruptManager (void)
 {
+    // interrupt handler
     if(INTCONbits.PEIE == 1)
     {
         if(PIE1bits.TXIE == 1 && PIR1bits.TXIF == 1)

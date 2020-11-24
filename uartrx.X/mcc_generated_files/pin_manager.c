@@ -1,26 +1,26 @@
 /**
-  Generated Interrupt Manager Source File
+  Generated Pin Manager File
 
-  @Company:
+  Company:
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.c
+  File Name:
+    pin_manager.c
 
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  Summary:
+    This is the Pin Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
+  Description:
+    This header file provides implementations for pin APIs for all pins selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.5
         Device            :  PIC16F18346
-        Driver Version    :  2.03
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.20 and above or later
-        MPLAB 	          :  MPLAB X 5.40
+        Compiler          :  XC8 2.20 and above
+        MPLAB             :  MPLAB X 5.40
+
+    Copyright (c) 2013 - 2015 released Microchip Technology Inc.  All rights reserved.
 */
 
 /*
@@ -46,31 +46,69 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
+#include "pin_manager.h"
 
-void __interrupt() INTERRUPT_InterruptManager (void)
+
+
+
+
+void PIN_MANAGER_Initialize(void)
 {
-    if(INTCONbits.PEIE == 1)
-    {
-        if(PIE1bits.TXIE == 1 && PIR1bits.TXIF == 1)
-        {
-            EUSART_TxDefaultInterruptHandler();
-        } 
-        else if(PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)
-        {
-            EUSART_RxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
+    /**
+    LATx registers
+    */
+    LATA = 0x00;
+    LATB = 0x00;
+    LATC = 0x00;
+
+    /**
+    TRISx registers
+    */
+    TRISA = 0x11;
+    TRISB = 0x70;
+    TRISC = 0xDF;
+
+    /**
+    ANSELx registers
+    */
+    ANSELC = 0xED;
+    ANSELB = 0xD0;
+    ANSELA = 0x37;
+
+    /**
+    WPUx registers
+    */
+    WPUB = 0x00;
+    WPUA = 0x00;
+    WPUC = 0x00;
+
+    /**
+    ODx registers
+    */
+    ODCONA = 0x00;
+    ODCONB = 0x00;
+    ODCONC = 0x00;
+
+    /**
+    SLRCONx registers
+    */
+    SLRCONA = 0x37;
+    SLRCONB = 0xF0;
+    SLRCONC = 0xFF;
+
+    /**
+    INLVLx registers
+    */
+    INLVLA = 0x3F;
+    INLVLB = 0xF0;
+    INLVLC = 0xFF;
+
+
+    RXPPS = 0x0D;   //RB5->EUSART:RX;    
+    RB7PPS = 0x14;   //RB7->EUSART:TX;    
 }
+  
+
 /**
  End of File
 */

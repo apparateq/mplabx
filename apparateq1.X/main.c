@@ -165,8 +165,8 @@ uint16_t receiveCommand() {
 void UARTRxLoop() {
   while (1) {
     // Go to sleep
-    BAUD1CONbits.WUE = 1;
-    SLEEP();
+    //BAUD1CONbits.WUE = 1;
+    //SLEEP();
     // Wake up and get some data
     uint16_t command = receiveCommand();
     // Enable relevant port
@@ -186,7 +186,7 @@ void main(void) {
   TMR0_StartTimer();
 
 
-  printf("Welcome!\n");
+  printf("Welcome!\r\n");
 
   //UARTRxLoop();
   // not reached

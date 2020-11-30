@@ -13,12 +13,12 @@
          <string>class com.microchip.mcc.mcu8.systemManager.osc.Osc</string>
       </entry>
       <entry>
-         <string>PMD</string>
-         <string>class com.microchip.mcc.mcu8.systemManager.pmd.PMD</string>
-      </entry>
-      <entry>
          <string>WDT</string>
          <string>class com.microchip.mcc.mcu8.systemManager.wdt.WDT</string>
+      </entry>
+      <entry>
+         <string>PMD</string>
+         <string>class com.microchip.mcc.mcu8.systemManager.pmd.PMD</string>
       </entry>
       <entry>
          <string>Pin Module</string>
@@ -2147,7 +2147,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG1" settingAlias="CLKOUTEN"/>
-         <value>OFF</value>
+         <value>ON</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="SSP2DATPPS"/>
@@ -3467,7 +3467,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG1"/>
-         <value>10500</value>
+         <value>10244</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATA" settingAlias="LATA4" alias="set"/>
@@ -4666,10 +4666,6 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T0CKIPPS%aux1"/>
-         <value>%DESELECT%</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="INLVLB" settingAlias="INLVLB7"/>
          <value>ST_input</value>
       </entry>
@@ -4708,12 +4704,12 @@
          <hash>fa9fd10a2ba112282120fd6da62a6ef11c45e7864cab03eae18dc9c00e9925a8</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/eusart.c</file>
-         <hash>0fe47611df2fb32694fa875b8819d4fad413ab63ee16660257d4bc3fc25196e3</hash>
-      </entry>
-      <entry>
          <file>main.c</file>
          <hash>92a3442b3b0be17646cc3d4a1d2e8e2a003175a40ec1d3985bb24d08766ef491</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/eusart.c</file>
+         <hash>0fe47611df2fb32694fa875b8819d4fad413ab63ee16660257d4bc3fc25196e3</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/mcc.h</file>
@@ -4721,7 +4717,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/device_config.c</file>
-         <hash>f411f169aa0e0318f4d02962b889088fef136ef9262e6da7f6d822feb33e4105</hash>
+         <hash>871832ad472ccb419f9bc1eff13f647bfa8a2fa5b5be64dae691cd9742ef4ee2</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/eusart.h</file>

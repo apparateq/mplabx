@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief 
+/// \brief
 ///
 //===----------------------------------------------------------------------===//
 
@@ -11,20 +11,54 @@
 #include "mcc_generated_files/mcc.h"
 #include "source/aptq_common.h"
 
-// Function prototypes
-void setLEDs(uint8_t val);
+//#define DISABLE_PRINTF
+
+#ifdef DISABLE_PRINTF
+    #define printf(fmt, ...) (0)
+#endif
+
+enum Command {NONE = 0, PORT, MULTIPORT};
 
 // Utility functions
 
-void fast_blink() {
+// LED functions
+#define BLNK_BAD_CHECKSUM 0xA
+#define BLNK_BAD_COMMAND  0xC
+#define BLNK_BAD_VALUE    0xF
+#define BLINK_DELAY 50
+
+// Turn on leds corresponding to the bitmask (lower four bits)
+void setLEDs(uint8_t mask) {
+  LED_D7_LAT = (mask & 8) >> 3;
+  LED_D6_LAT = (mask & 4) >> 2;
+  LED_D5_LAT = (mask & 2) >> 1;
+  LED_D4_LAT = (mask & 1) >> 0;
+}
+
+// Do a sweep to indicate a good command
+void good_blink() {
+    setLEDs(8);
+    __delay_ms(BLINK_DELAY);
+    setLEDs(4);
+    __delay_ms(BLINK_DELAY);
+    setLEDs(2);
+    __delay_ms(BLINK_DELAY);
+    setLEDs(1);
+    __delay_ms(BLINK_DELAY);
+    setLEDs(0);
+}
+
+// Fast double blink for errors
+void fast_blink(uint8_t val) {
   uint8_t i;
   for (i = 0; i < 2; i++) {
-    setLEDs(0x0f);
-    __delay_ms(50);
+    setLEDs(val);
+    __delay_ms(BLINK_DELAY);
     setLEDs(0x00);
-    __delay_ms(50);
+    __delay_ms(BLINK_DELAY);
   }
 }
+
 
 // overload putch() so printf() goes to UART
 void putch(char data) {
@@ -34,67 +68,120 @@ void putch(char data) {
   TXREG = data;
 }
 
-// map lower four bits of val to LEDs D7-D4
-void setLEDs(uint8_t val) {
-  LED_D7_LAT = (val & 1) >> 0;
-  LED_D6_LAT = (val & 2) >> 1;
-  LED_D5_LAT = (val & 4) >> 2;
-  LED_D4_LAT = (val & 8) >> 3;
+
+
+/// Parser
+
+// Port command takes values '0' - '4'
+// 0: no active ports
+// 1: port D
+// 2: port C
+// 3: port B
+// 4: port A
+void cmd_port(uint8_t value) {
+  uint8_t mask;
+  if (value == 0) {
+    mask = 0;
+  } else {
+    mask = (uint8_t)(1 << (4 - value));
+  }
+  setLEDs(mask);
 }
 
-// Applications
+// Multiport command takes ascii values '0' - '?' (16 values bitmask)
+void cmd_multiport(uint8_t mask) {
+  setLEDs(mask);
+}
 
-uint8_t receiveCommand() {
+
+void receiveCommand() {
   uint8_t state = 0;
+  enum Command cmd = NONE;
+  uint8_t done = 0;
   uint8_t ch;
-  uint8_t port;
-  
-  while (state != 3) {
+  uint8_t cmdbuf[6];
+  uint8_t expect; // expected checksum
+
+  while (!done) {
     ch = EUSART_Read();
+    cmdbuf[state] = ch;
     //printf("\r\nstate: %d [%c] (%d)", state, ch, ch);
-    
+
     switch (state) {
-      case 0:
+      case 0: // Search for start of command
         if (ch == 'A') { // data must start with 'A'
           printf("%c", ch);
           state = 1;
         } else {
-          fast_blink();
+          fast_blink(BLNK_BAD_VALUE);
         }
         break;
-        
-      case 1:
-        port = ch;
-        if (port < 48 || port > 51) { // only accept '0', '1', '2', '3'
-          fast_blink();
+
+      case 1: // Command is either 'P' or 'M
+        if (ch == 'P') { // Port (P) command accepts values 0, 1, 2, 3
+          printf("%c", ch);
+          cmd = PORT;
+          state = 2;
+        } else if (ch == 'M') { // Multiport accepts 0, 1, 2, ... 15)
+          printf("%c", ch);
+          cmd = MULTIPORT;
+          state = 2;
+        } else {
+          state = 0;
+          fast_blink(BLNK_BAD_COMMAND);
+        }
+        break;
+
+      case 2:
+        if ((cmd == PORT) && ((ch < '0') || (ch > '4'))) {
+          fast_blink(BLNK_BAD_VALUE);
+          state = 0;
+        } else if ((cmd == MULTIPORT) && ((ch < '0') || (ch > '?'))) {
+          fast_blink(BLNK_BAD_VALUE);
           state = 0;
         } else {
           printf("%c", ch);
-          state = 2;
+          state = 3;
         }
         break;
-        
-      case 2:
+
+      case 3:
+        expect = cmdbuf[0] ^ cmdbuf[1] ^ cmdbuf[2];
+        if (cmdbuf[3] != expect) { // xor cksum must be 0
+          printf("Expected %d, got %d\r\n", expect, cmdbuf[3]);
+          fast_blink(BLNK_BAD_CHECKSUM);
+          state = 0;
+        } else {
+          printf("(%d)", cmdbuf[3]);
+          state = 4;
+        }
+        break;
+
+      case 4:
         if (ch == 10 || ch == 13) { // terminate with '\n' or '\r'
           printf("(cr)\r\n");
-          state = 3;
+          done = 1;
         } else {
-          fast_blink();
+          fast_blink(BLNK_BAD_VALUE);
           state = 0;
         }
         break;
     }
   }
+  good_blink();
 
-  return (port - 48); // 0, 1, 2, 3
+  if (cmd == PORT) {
+    cmd_port(cmdbuf[2] - '0');
+  } else if (cmd == MULTIPORT) {
+    cmd_multiport(cmdbuf[2] - '0');
+  }
 }
 
-//#define printf(...)
-
+//
 void UARTRxLoop() {
   while (1) {
     // Go to sleep
-    printf("sleeping\r\n");
+    printf("(sleep)\r\n");
     BAUD1CONbits.WUE = 1;
     SLEEP();
 
@@ -104,12 +191,7 @@ void UARTRxLoop() {
     __delay_ms(50);
     printf("\r\nenter command:\r\n");
 
-
-    uint8_t command = receiveCommand();
-    printf("Command: %d\r\n", command);
-    // Enable relevant port
-    uint8_t val = (uint8_t)(1 << command);
-    setLEDs(val);
+    receiveCommand();
   }
 }
 
@@ -121,7 +203,8 @@ void main(void) {
   INTERRUPT_GlobalInterruptEnable();
   INTERRUPT_PeripheralInterruptEnable();
 
-  printf("Welcome!\r\n");
- 
+  printf("\e[1;1H\e[2J");
+  printf("Apparateq\r\n\r\n");
+
   UARTRxLoop();
 }

@@ -29,10 +29,10 @@ enum Command {NONE = 0, PORT, MULTIPORT};
 
 // Turn on leds corresponding to the bitmask (lower four bits)
 void setLEDs(uint8_t mask) {
-  LED_D7_LAT = (mask & 8) >> 3;
-  LED_D6_LAT = (mask & 4) >> 2;
-  LED_D5_LAT = (mask & 2) >> 1;
-  LED_D4_LAT = (mask & 1) >> 0;
+  PORTA_LED_LAT = (mask & 8) >> 3;
+  PORTB_LED_LAT = (mask & 4) >> 2;
+  PORTC_LED_LAT = (mask & 2) >> 1;
+  PORTD_LED_LAT = (mask & 1) >> 0;
 }
 
 // Do a sweep to indicate a good command
@@ -205,6 +205,22 @@ void main(void) {
 
   printf("\e[1;1H\e[2J");
   printf("Apparateq\r\n\r\n");
+  
+  while (1) {
+    COM_GRN_LED_LAT = 1;
+    COM_RED_LED_LAT = 1;
+    TEST_LED_LAT = 1;
+    PWR_RED_LED_LAT = 1;
+    setLEDs(0);
+    __delay_ms(1000);
+    
+    COM_GRN_LED_LAT = 0;
+    COM_RED_LED_LAT = 0;
+    TEST_LED_LAT = 0;
+    PWR_RED_LED_LAT = 0;
+    setLEDs(0xff);
+    __delay_ms(1000);
+  }
 
   UARTRxLoop();
 }

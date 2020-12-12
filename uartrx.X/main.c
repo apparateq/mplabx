@@ -27,12 +27,25 @@ enum Command {NONE = 0, PORT, MULTIPORT};
 #define BLNK_BAD_VALUE    0xF
 #define BLINK_DELAY 50
 
+#define MASK_PORTD   0x01
+#define MASK_PORTC   0x02
+#define MASK_PORTB   0x04
+#define MASK_PORTA   0x08
+#define MASK_PWR     0x10
+#define MASK_COM_GRN 0x20
+#define MASK_COM_RED 0x40
+#define MASK_TEST    0x80
+
 // Turn on leds corresponding to the bitmask (lower four bits)
 void setLEDs(uint8_t mask) {
-  PORTA_LED_LAT = (mask & 8) >> 3;
-  PORTB_LED_LAT = (mask & 4) >> 2;
-  PORTC_LED_LAT = (mask & 2) >> 1;
-  PORTD_LED_LAT = (mask & 1) >> 0;
+  TEST_LED_LAT = (mask & MASK_TEST) >> 7;
+  COM_RED_LED_LAT = (mask & MASK_COM_RED) >> 6;
+  COM_GRN_LED_LAT = (mask & MASK_COM_GRN) >> 5;
+  PWR_RED_LED_LAT = (mask & MASK_PWR) >> 4;
+  PORTA_LED_LAT = (mask & MASK_PORTA) >> 3;
+  PORTB_LED_LAT = (mask & MASK_PORTB) >> 2;
+  PORTC_LED_LAT = (mask & MASK_PORTC) >> 1;
+  PORTD_LED_LAT = (mask & MASK_PORTD) >> 0;
 }
 
 // Do a sweep to indicate a good command
@@ -81,9 +94,9 @@ void putch(char data) {
 void cmd_port(uint8_t value) {
   uint8_t mask;
   if (value == 0) {
-    mask = 0;
+    mask = 0x0f;
   } else {
-    mask = (uint8_t)(1 << (4 - value));
+    mask = ~(uint8_t)(1 << (4 - value));
   }
   setLEDs(mask);
 }
@@ -206,21 +219,16 @@ void main(void) {
   printf("\e[1;1H\e[2J");
   printf("Apparateq\r\n\r\n");
   
-  while (1) {
-    COM_GRN_LED_LAT = 1;
-    COM_RED_LED_LAT = 1;
-    TEST_LED_LAT = 1;
-    PWR_RED_LED_LAT = 1;
-    setLEDs(0);
-    __delay_ms(1000);
-    
-    COM_GRN_LED_LAT = 0;
-    COM_RED_LED_LAT = 0;
-    TEST_LED_LAT = 0;
-    PWR_RED_LED_LAT = 0;
-    setLEDs(0xff);
-    __delay_ms(1000);
-  }
+  
+  cmd_port(0);
+  
+  //while (1) {
+  //  setLEDs(0);
+  //  __delay_ms(1000);
+//
+    //setLEDs(0xff);
+    //__delay_ms(1000);
+  //}
 
   UARTRxLoop();
 }
